@@ -13,7 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:text="PD Theme for PDDate"
+        android:text="@string/loading_text"
         android:maxLines="1"
         android:gravity="center_horizontal"
         android:textColor="@android:color/black">
@@ -25,22 +25,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:text="PD Theme"
+        android:text="@string/placeholder_theme"
         android:maxLines="1"
         android:gravity="center_horizontal"
         android:textColor="@android:color/black">
-    </TextView>
-
-    <TextView
-        android:id="@+id/update"
-        style="@android:style/TextAppearance.Medium"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center_horizontal|center_vertical"
-        android:layout_margin="4dip"
-        android:text="Static Text"
-        android:background="@android:color/holo_red_dark">
     </TextView>
 
 </LinearLayout>

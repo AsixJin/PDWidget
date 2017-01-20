@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.asix.pixeldailieswidget">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
@@ -17,11 +19,8 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/widget_info" />
         </receiver>
-
         <meta-data
             android:name="io.fabric.ApiKey"
             android:value="2ff8428156fd19a12dc9391836ce6a5cccfb10fa" />
     </application>
-
-    <uses-permission android:name="android.permission.INTERNET" />
 </manifest>
