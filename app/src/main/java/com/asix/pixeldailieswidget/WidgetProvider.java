@@ -1,13 +1,16 @@
 package com.asix.pixeldailieswidget;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import com.twitter.sdk.android.Twitter;
 import com.twitter.sdk.android.core.Callback;
@@ -33,8 +36,24 @@ public class WidgetProvider extends AppWidgetProvider {
     private String pdTheme = "ERROR (No Theme)";
     private String pdDate = "ERROR (No Date)";
 
+    private ArrayList<PDItem> dailiesList = new ArrayList<>();
+
+    private boolean navigating = false;
+    private boolean navigateBack = false;
+
     @Override
-    public void onUpdate(final Context context,final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
+    public void onReceive(Context context, Intent intent) {
+        if(intent.hasExtra("navigateBack")){
+            navigating = true;
+            navigateBack = intent.getBooleanExtra("navigateBack", false);
+        }else{
+            navigating = false;
+        }
+        super.onReceive(context, intent);
+    }
+
+    @Override
+    public void onUpdate(final Context context, final AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         Log.w(LOG, "onUpdate called");
         TwitterAuthConfig authConfig = new TwitterAuthConfig(TWITTER_KEY, TWITTER_SECRET);
         Fabric.with(context, new Twitter(authConfig));
@@ -43,50 +62,62 @@ public class WidgetProvider extends AppWidgetProvider {
         ComponentName thisWidget = new ComponentName(context, WidgetProvider.class);
         final int[] allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget);
 
-        TwitterApiClient guestApiClient = TwitterCore.getInstance().getGuestApiClient();
-        guestApiClient.getStatusesService().userTimeline(null, "pixel_dailies", 20, null, null, null, true, null, false).enqueue(new Callback<List<Tweet>>() {
-            @Override
-            public void success(Result<List<Tweet>> result) {
-                //Get the tweets
-                List<Tweet> pdTimeline = result.data;
+        //Setup and call the twitter API
+        if(navigating){
+            Log.w(LOG, "Navigating...Not loading list");
+            startService(context, allWidgetIds);
+        }else{
+            Log.w(LOG, "Refreshing list");
+            TwitterApiClient guestApiClient = TwitterCore.getInstance().getGuestApiClient();
+            guestApiClient.getStatusesService().userTimeline(null, "pixel_dailies", 210, null, null, null, true, null, false).enqueue(new Callback<List<Tweet>>() {
+                @Override
+                public void success(Result<List<Tweet>> result) {
+                    //Get the tweets
+                    List<Tweet> pdTimeline = result.data;
 
-                //Get Theme
-                boolean done = false;
-                for (Tweet t:pdTimeline) {
-                    done = getPDTweet(t);
-                    if(done){
-                        break;
+                    //Get Theme List
+                    for (Tweet t:pdTimeline) {
+                        getPDTweet(t);
                     }
+
+                    startService(context, allWidgetIds);
                 }
 
-                // Build the intent to call the service
-                Intent intent = new Intent(context.getApplicationContext(), UpdateWidgetService.class);
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
-                intent.putExtra("theme", pdTheme);
-                intent.putExtra("date", pdDate);
+                @Override
+                public void failure(TwitterException exception) {
+                    pdTheme = "Failure";
 
-                // Update the widgets via the service
-                context.startService(intent);
-            }
+                    //Print Error to the log
+                    Log.e(LOG, exception.getMessage());
 
-            @Override
-            public void failure(TwitterException exception) {
-                pdTheme = "Failure";
+                    // Build the intent to call the service
+                    Intent intent = new Intent(context.getApplicationContext(), UpdateWidgetService.class);
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+                    intent.putExtra("theme", pdTheme);
+                    intent.putExtra("date", pdDate);
 
-                //Print Error to the log
-                Log.e(LOG, exception.getMessage());
+                    // Update the widgets via the service
+                    context.startService(intent);
+                }
+            });
+        }
 
-                // Build the intent to call the service
-                Intent intent = new Intent(context.getApplicationContext(), UpdateWidgetService.class);
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
-                intent.putExtra("theme", pdTheme);
-                intent.putExtra("date", pdDate);
-
-                // Update the widgets via the service
-                context.startService(intent);
-            }
-        });
     }
+
+    private void startService(Context context, int[] allWidgetIds){
+        // Build the intent to call the service
+        Intent intent = new Intent(context.getApplicationContext(), UpdateWidgetService.class);
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, allWidgetIds);
+        if(navigating){
+            intent.putExtra("navigateBack", navigateBack);
+        }else{
+            intent.putExtra("list", dailiesList);
+        }
+
+        // Update the widgets via the service
+        context.startService(intent);
+    }
+
 
     //Determines if the tweet is a valid pd tweet
     //and sets the theme/date and returns true.
@@ -94,17 +125,22 @@ public class WidgetProvider extends AppWidgetProvider {
     //isn't a pd tweet.
     private boolean getPDTweet(Tweet tweet){
         boolean isThemeTweet = false;
-        if(tweet.retweetedStatus == null){
+        if(tweet.text.contains("theme")){
             isThemeTweet = true;
             TweetEntities entities = tweet.entities;
             for (HashtagEntity he :entities.hashtags) {
-                if(!he.text.equalsIgnoreCase("pixel_dailies")){
+                if(!he.text.equalsIgnoreCase("pixel_dailies") && !he.text.equalsIgnoreCase(pdTheme)){
                     pdTheme = he.text;
                     pdDate = tweet.createdAt.substring(4, 10);
+                    PDItem item = new PDItem(pdTheme, pdDate);
+                    dailiesList.add(item);
+                    break;
                 }
             }
 
         }
         return isThemeTweet;
     }
+
+
 }

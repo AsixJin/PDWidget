@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">PD Widget</string>
 
+    <string name="refresh_text">Refresh</string>
     <string name="loading_text">Loading</string>
     <string name="placeholder_theme">PD Theme</string>
+
+    <string name="prevButton_contentDescript">Previous Theme</string>
+    <string name="nextButton_contentDescript">Next Theme</string>
 </resources>
