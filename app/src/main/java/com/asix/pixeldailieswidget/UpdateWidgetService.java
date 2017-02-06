@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.RemoteViews;
@@ -89,10 +90,10 @@ public class UpdateWidgetService extends Service {
             RemoteViews remoteViews = new RemoteViews(this.getApplicationContext().getPackageName(), R.layout.widget_layout);
 
             // Set the theme text
-            remoteViews.setTextViewText(R.id.pdTheme, pdTheme);
+            remoteViews.setTextViewText(R.id.pdTheme, "#"+pdTheme);
 
             //Set the theme date
-            remoteViews.setTextViewText(R.id.pdDate, "PD Theme for " + pdDate);
+            remoteViews.setTextViewText(R.id.pdDate, "Theme for " + pdDate);
 
             Log.w(LOG, pdDate + ": " + pdTheme);
 
@@ -126,6 +127,18 @@ public class UpdateWidgetService extends Service {
 
             PendingIntent pendingIntentNext = PendingIntent.getBroadcast(getApplicationContext(), 2, nextIntent, PendingIntent.FLAG_CANCEL_CURRENT);
             remoteViews.setOnClickPendingIntent(R.id.nextPD, pendingIntentNext);
+            //endregion
+
+            //region Register an onClickListener for theme box
+            //https://twitter.com/search?l=&q=%23coin%20%40pixel_dailies&src=typd&lang=en
+
+            String url = "https://twitter.com/search?l=&q=%23" + pdTheme + "%20%40pixel_dailies&src=typd&lang=en";
+            Intent twitterIntent = new Intent(Intent.ACTION_VIEW);
+
+            twitterIntent.setData(Uri.parse(url));
+
+            PendingIntent pendingIntentTwitter = PendingIntent.getActivity(getApplicationContext(), 3, twitterIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            remoteViews.setOnClickPendingIntent(R.id.pdTheme, pendingIntentTwitter);
             //endregion
 
             appWidgetManager.updateAppWidget(widgetId, remoteViews);
