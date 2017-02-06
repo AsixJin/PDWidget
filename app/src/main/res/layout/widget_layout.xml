@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/layout"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="8dip"
     android:orientation="vertical" >
@@ -21,7 +21,7 @@
 
         <LinearLayout
             android:id="@+id/themePanel"
-            android:layout_width="250dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingEnd="3dp"
             android:paddingStart="3dp"
@@ -34,6 +34,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="top"
                 android:text="@string/loading_text"
+                android:paddingEnd="30dp"
+                android:paddingStart="30dp"
                 android:maxLines="1"
                 android:gravity="center_horizontal"
                 android:textColor="@android:color/black"
@@ -48,7 +50,7 @@
                 android:text="@string/placeholder_theme"
                 android:maxLines="1"
                 android:gravity="center_horizontal"
-                android:textColor="@android:color/black"
+                android:textColor="@color/hyperlink"
                 android:background="@color/pdColor">
             </TextView>
         </LinearLayout>

@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
 
     <color name="pdColor">#31A2F2</color>
+    <color name="hyperlink">#0645AD</color>
 </resources>
