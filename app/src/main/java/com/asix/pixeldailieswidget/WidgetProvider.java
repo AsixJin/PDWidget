@@ -125,11 +125,11 @@ public class WidgetProvider extends AppWidgetProvider {
     //isn't a pd tweet.
     private boolean getPDTweet(Tweet tweet){
         boolean isThemeTweet = false;
-        if(tweet.text.contains("theme")){
+        if(tweet.text.contains("theme") || tweet.text.contains("task")){
             isThemeTweet = true;
             TweetEntities entities = tweet.entities;
             for (HashtagEntity he :entities.hashtags) {
-                if(!he.text.equalsIgnoreCase("pixel_dailies") && !he.text.equalsIgnoreCase(pdTheme)){
+                if(!he.text.equalsIgnoreCase("pixel_dailies") && !he.text.equalsIgnoreCase(pdTheme) && !he.text.equalsIgnoreCase("set")){
                     pdTheme = he.text;
                     pdDate = tweet.createdAt.substring(4, 10);
                     PDItem item = new PDItem(pdTheme, pdDate);
